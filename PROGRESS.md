@@ -17,6 +17,12 @@
 - GitHub auth: token from Git Credential Manager for user `m4xjk3`
   (scopes `repo`, `workflow`, `gist`). `gh` CLI is not installed; the API was
   used directly.
+- GitHub Actions **green**: run
+  <https://github.com/m4xjk3/cold-cat-android/actions/runs/41269985451> — unit
+  tests + debug APK built on `ubuntu-latest` (JDK 17, SDK 37.2).
+  CI note: the runner's preinstalled `cmdline-tools` 16.0 cannot see SDK minor
+  versions; the workflow upgrades to `cmdline-tools;latest` and uses the
+  semicolon package id `platforms;android-37.2`.
 
 ## Status: BUILD WORKS ✅
 

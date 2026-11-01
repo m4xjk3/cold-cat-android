@@ -23,9 +23,7 @@ jobs:
           yes | "$old" --install "cmdline-tools;latest" > /dev/null || true
           # The new tools may land in cmdline-tools/latest-<n>; pick the newest.
           SM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | sort -V | tail -n 1)
-          echo "using $SM"
           yes | "$SM" --licenses > /dev/null || true
-          "$SM" --list | grep -E "android-37|build-tools;37" | head -n 20 || true
           yes | "$SM" "platforms;android-37.2" "build-tools;37.0.0"
       - uses: gradle/actions/setup-gradle@v4
       - name: Unit tests
