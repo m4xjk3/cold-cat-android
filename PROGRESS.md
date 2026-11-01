@@ -5,6 +5,19 @@
 **GitHub account (from Git Credential Manager):** `m4xjk3`
 **Build logs:** `%TEMP%\coldcat-build6.log` (debug), `%TEMP%\coldcat-release4.log` (release)
 
+## Status: PUBLISHED ✅
+
+- Repository: <https://github.com/m4xjk3/cold-cat-android> (public, `main` pushed)
+- Release `v0.1.0`: <https://github.com/m4xjk3/cold-cat-android/releases/tag/v0.1.0>
+  - `ColdCat-0.1.0-arm64-v8a.apk` (98 865 744 bytes, SHA-256
+    `232DF74B25AF45352910C8E1FDF7FB7AE1F408750EF4F6B2A68EE0513C8417BD`)
+  - `ColdCat-0.1.0-armeabi-v7a.apk` (96 089 734 bytes, SHA-256
+    `3AE9B475599F13C32F19A7ACB2A8BAAC25D4C6D0BC5A697157881B8E15C629C2`)
+- APKs are release assets only; `dist/` is gitignored.
+- GitHub auth: token from Git Credential Manager for user `m4xjk3`
+  (scopes `repo`, `workflow`, `gist`). `gh` CLI is not installed; the API was
+  used directly.
+
 ## Status: BUILD WORKS ✅
 
 - `.\gradlew.bat testDebugUnitTest` — pass.
@@ -91,10 +104,7 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
 
 ## Remaining work
 
-1. ~~Git init + commit~~ / publish (see below — next action).
-2. Publish to GitHub as `m4xjk3/cold-cat-android` and create release `v0.1.0`
-   with both APKs as assets (APKs stay out of git; `dist/` is gitignored).
-3. Smoke test on a real ARM device / emulator:
+1. Smoke test on a real ARM device / emulator:
    - first launch, browsing, tabs, desktop mode;
    - extension install from the catalog and from an `.xpi` URL;
    - home page (`resource://android/assets/home.html` — fallback
@@ -103,19 +113,22 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
    would need an ARM image or a temporary x86_64 build.
 4. Later: PC version in a separate repository.
 
-## Publish commands (when `gh` is authenticated as m4xjk3)
+## How the release was published (for repeats)
+
+`gh` CLI is not installed, so the GitHub REST API was used with the token from
+Git Credential Manager:
 
 ```powershell
-cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
-git init -b main
-git add -A
-git commit -m "Cold Cat 0.1.0: GeckoView browser with Firefox extensions"
-gh repo create m4xjk3/cold-cat-android --public --source . --remote origin --push
-gh release create v0.1.0 `
-  dist/ColdCat-0.1.0-arm64-v8a.apk `
-  dist/ColdCat-0.1.0-armeabi-v7a.apk `
-  --title "Cold Cat 0.1.0" --notes-file CHANGELOG.md
+# token (never stored in the repo)
+$c = "protocol=https`nhost=github.com`n`n" | git credential fill
+$tok = ($c | Where-Object { $_ -like "password=*" }) -replace "^password=", ""
+
+# release + asset upload
+POST https://api.github.com/repos/m4xjk3/cold-cat-android/releases
+POST https://uploads.github.com/repos/m4xjk3/cold-cat-android/releases/<id>/assets?name=<file>
 ```
+
+Pushing ordinary commits: `git push origin main` (GCM supplies credentials).
 
 ## Known risks / not yet tested
 

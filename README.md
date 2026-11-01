@@ -6,7 +6,7 @@
 
 <p align="center">
   Лёгкий Android-браузер на движке GeckoView с поддержкой расширений Firefox.<br>
-  <a href="releases">Скачать APK</a> ·
+  <a href="https://github.com/m4xjk3/cold-cat-android/releases/latest">Скачать APK</a> ·
   <a href="#сборка">Собрать самому</a> ·
   <a href="CHANGELOG.md">Изменения</a>
 </p>
@@ -46,7 +46,8 @@ Cold Cat — независимый браузер для Android. Он испо
 
 ## Установка
 
-1. Скачайте APK из [Releases](releases):
+1. Скачайте APK из
+   [Releases](https://github.com/m4xjk3/cold-cat-android/releases/latest):
    - `ColdCat-0.1.0-arm64-v8a.apk` — для современных телефонов (почти все
      устройства после 2016 года);
    - `ColdCat-0.1.0-armeabi-v7a.apk` — для старых 32-битных ARM-устройств.
