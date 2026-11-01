@@ -21,7 +21,8 @@ jobs:
           # versions such as android-37.2; upgrade it first.
           old=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -n 1)
           yes | "$old" --install "cmdline-tools;latest" > /dev/null || true
-          SM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          # The new tools may land in cmdline-tools/latest-<n>; pick the newest.
+          SM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | sort -V | tail -n 1)
           yes | "$SM" --licenses > /dev/null || true
           yes | "$SM" "platforms/android-37.2" "build-tools;37.0.0"
       - uses: gradle/actions/setup-gradle@v4
