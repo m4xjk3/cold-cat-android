@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cold Cat</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --navy: #061b33;
+    --navy-2: #0b2a4a;
+    --ice: #7fd3ff;
+    --ice-2: #2b9bd6;
+    --text: #eaf4ff;
+    --muted: #a9c4dd;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at 50% -10%, #16507f 0%, var(--navy-2) 42%, var(--navy) 100%);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 36px 22px 48px;
+  }
+  main { width: 100%; max-width: 620px; text-align: center; }
+  .logo {
+    width: 132px; height: 132px; border-radius: 50%;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .45), 0 0 0 1px rgba(127, 211, 255, .25);
+  }
+  h1 { font-size: 34px; letter-spacing: -.6px; margin: 18px 0 2px; }
+  .tagline { color: var(--muted); margin: 0 0 26px; font-size: 15px; }
+  form { display: flex; gap: 8px; margin-bottom: 30px; }
+  input[type=search] {
+    flex: 1; min-width: 0; height: 50px; border-radius: 25px;
+    border: 1px solid rgba(127, 211, 255, .35);
+    background: rgba(18, 57, 94, .75); color: var(--text);
+    padding: 0 20px; font-size: 16px; outline: none;
+  }
+  input[type=search]::placeholder { color: var(--muted); }
+  input[type=search]:focus { border-color: var(--ice); box-shadow: 0 0 0 3px rgba(127, 211, 255, .15); }
+  button {
+    height: 50px; padding: 0 22px; border: 0; border-radius: 25px;
+    background: linear-gradient(135deg, var(--ice), var(--ice-2));
+    color: #041422; font-weight: 700; font-size: 15px;
+  }
+  .links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .links a {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 54px; border-radius: 16px; text-decoration: none;
+    color: var(--text); background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(127, 211, 255, .14); font-size: 14px;
+  }
+  .links a:active { background: rgba(127, 211, 255, .16); }
+  .features {
+    margin-top: 30px; padding: 16px 18px; border-radius: 18px; text-align: left;
+    background: rgba(127, 211, 255, .06); border: 1px solid rgba(127, 211, 255, .12);
+    color: var(--muted); font-size: 13px; line-height: 1.55;
+  }
+  .features strong { color: var(--text); }
+  footer { margin-top: 26px; color: rgba(169, 196, 221, .65); font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="logo.png" alt="Cold Cat">
+  <h1>Cold Cat</h1>
+  <p class="tagline">Fast. Private. Yours.</p>
+
+  <form action="https://duckduckgo.com/" method="get">
+    <input type="search" name="q" placeholder="Search with DuckDuckGo" autocomplete="off">
+    <button type="submit">Go</button>
+  </form>
+
+  <nav class="links">
+    <a href="https://duckduckgo.com/">DuckDuckGo</a>
+    <a href="https://en.wikipedia.org/">Wikipedia</a>
+    <a href="https://www.youtube.com/">YouTube</a>
+    <a href="https://github.com/">GitHub</a>
+    <a href="https://addons.mozilla.org/android/">Firefox add-ons</a>
+    <a href="https://waterfox.com/">Waterfox</a>
+  </nav>
+
+  <div class="features">
+    <strong>Firefox extensions on Android.</strong><br>
+    Install signed add-ons from addons.mozilla.org. Strict tracking protection is on by default.
+    Powered by GeckoView — the engine behind Firefox and Waterfox.
+  </div>
+
+  <footer>Cold Cat 0.1.0 · MPL-2.0</footer>
+</main>
+</body>
+</html>

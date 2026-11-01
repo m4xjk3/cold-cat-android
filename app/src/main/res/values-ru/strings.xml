@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cold Cat</string>
+
+    <string name="url_hint">Поиск или адрес</string>
+    <string name="back">Назад</string>
+    <string name="forward">Вперёд</string>
+    <string name="home">Домой</string>
+    <string name="tabs">Вкладки</string>
+    <string name="menu">Меню</string>
+    <string name="reload">Обновить</string>
+    <string name="stop">Остановить</string>
+    <string name="new_tab">Новая вкладка</string>
+    <string name="close_tab">Закрыть вкладку</string>
+    <string name="tab_number">Вкладка %1$d</string>
+
+    <string name="addons">Дополнения</string>
+    <string name="addons_title">Дополнения Firefox</string>
+    <string name="addons_subtitle">Устанавливайте подписанные расширения с addons.mozilla.org. Они работают прямо в движке браузера, как в Firefox для Android.</string>
+    <string name="addons_recommended">Рекомендуем</string>
+    <string name="addons_installed">Установлено</string>
+    <string name="addons_none">Пока нет установленных дополнений.</string>
+    <string name="install">Установить</string>
+    <string name="installed">Установлено</string>
+    <string name="uninstall">Удалить</string>
+    <string name="install_from_url">Установить по ссылке на .xpi</string>
+    <string name="install_from_url_hint">https://addons.mozilla.org/…/latest.xpi</string>
+    <string name="install_url_title">Установка дополнения</string>
+    <string name="addon_installing">Устанавливаем %1$s…</string>
+    <string name="addon_installed">%1$s установлено. Перезагружаем вкладки…</string>
+    <string name="addon_install_failed">Не удалось установить дополнение: %1$s</string>
+    <string name="addon_removed">%1$s удалено.</string>
+    <string name="addon_remove_failed">Не удалось удалить дополнение: %1$s</string>
+    <string name="uninstall_title">Удалить %1$s?</string>
+    <string name="uninstall_message">Расширение и его локальные данные будут удалены.</string>
+    <string name="permissions_title">Добавить %1$s?</string>
+    <string name="permissions_message">Расширение запрашивает доступ к:\n\n%1$s\n\nУстанавливайте только те расширения, которым доверяете.</string>
+    <string name="permissions_none">Дополнительные разрешения не нужны.</string>
+    <string name="allow">Добавить</string>
+    <string name="deny">Отмена</string>
+    <string name="amo_browse">Открыть addons.mozilla.org</string>
+    <string name="addons_note">Часть API, доступных только в десктопном Firefox, на Android не работает. Дополнения должны быть подписаны Mozilla — неподписанные .xpi отклоняются.</string>
+
+    <string name="desktop_site">Версия для ПК</string>
+    <string name="mobile_site">Мобильная версия</string>
+    <string name="share">Поделиться</string>
+    <string name="about">О Cold Cat</string>
+    <string name="about_version">Версия %1$s</string>
+    <string name="about_text">Cold Cat — лёгкий браузер для Android на движке GeckoView, на котором работают Firefox и Waterfox для Android. Поддерживает подписанные расширения Firefox, строгую защиту от трекинга и не перегружает интерфейс.\n\nCold Cat — независимый проект, не связанный с Mozilla или Waterfox.</string>
+    <string name="about_license">Свободное ПО под лицензией Mozilla Public License 2.0.</string>
+    <string name="share_via">Поделиться страницей</string>
+    <string name="copy_link">Копировать ссылку</string>
+    <string name="link_copied">Ссылка скопирована.</string>
+    <string name="open_external_failed">Нет приложения, которое может открыть эту ссылку.</string>
+    <string name="page_error">Не удалось загрузить страницу.</string>
+    <string name="search_engine">DuckDuckGo</string>
+</resources>
