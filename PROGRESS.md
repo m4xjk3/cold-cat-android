@@ -5,9 +5,26 @@
 **GitHub:** <https://github.com/m4xjk3/cold-cat-android>
 **Releases:** <https://github.com/m4xjk3/cold-cat-android/releases>
 
-## Current version: 0.1.1 (Android-first)
+## Current version: 0.1.2 (diagnostics build)
 
 Android-only product. Desktop version is a later, separate repository.
+
+### 0.1.2 — diagnostics build (crash investigation)
+
+The 0.1.1 APK is reported by the user as crashing on launch / doing nothing
+(extensions and search dead). No device or crash log was available, so 0.1.2
+adds on-device diagnostics instead of guessing:
+
+- Menu → **Diagnostics**: app version, device, Android version, ABIs, GeckoView
+  version, runtime state, tab count, last error — with a Copy button.
+- `CrashLog`: records the last uncaught Java/Kotlin exception to
+  `files/last-crash.txt` and shows it on the next launch.
+- GeckoView runtime creation is wrapped in `runCatching`; a failure sets
+  `ColdCatApp.startupError` and shows a report instead of killing the process.
+- Session tracking: if the previous run did not shut down normally (native
+  GeckoView crash or process kill), the next launch reports that, which
+  distinguishes native crashes from Java ones.
+- Add-ons screen and tab creation are guarded when the engine is unavailable.
 
 ### 0.1.1 — new transparent logo + Android share target
 
@@ -28,6 +45,16 @@ Android-only product. Desktop version is a later, separate repository.
   [Waterfox for Android](https://github.com/BrowserWorks/waterfox-android)
   (Fenix/mozilla-central fork) and why Cold Cat uses the same GeckoView engine
   with its own Android UI instead of forking Fenix.
+
+### APK 0.1.2 (signed, V2, `CN=Cold Cat`)
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `ColdCat-0.1.2-arm64-v8a.apk` | 98 955 284 | `41AEF133F9C8DA8C3EBE2EA5FC2170149B1EB1C0E473F86B4509B6A5F1C5E152` |
+| `ColdCat-0.1.2-armeabi-v7a.apk` | 96 179 274 | `B6F0596D2FC7BE119C62C408917E46018F8BF137861D25AFEF4CB01227F84832` |
+
+`versionCode = 3`, `versionName = 0.1.2`, package `com.coldcat.browser`,
+minSdk 26, targetSdk 37, ABIs arm64-v8a / armeabi-v7a. Unit tests: 7 passed.
 
 ### APK 0.1.1 (signed, V2, `CN=Cold Cat`)
 
@@ -69,6 +96,24 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
   cmdline-tools 16.0 cannot see SDK minor versions; package id must be
   `platforms;android-37.2` (semicolon).
 
+## Blockers / crash investigation
+
+- No Android device is attached (`adb devices` empty) and the emulator is not
+  usable on this machine (no `emulator` package, VT-x disabled:
+  `VirtualizationFirmwareEnabled = False`), so crashes cannot be reproduced
+  locally.
+- 0.1.2 exists to obtain a real report from the user's phone. Awaiting:
+  diagnostics text, phone model, Android version, installed ABI.
+- Candidate causes if it is a native crash on `GeckoRuntime.create`:
+  1. Kotlin 2.4 metadata read by the 2.2.10 compiler
+     (`-Xskip-metadata-version-check`) producing wrong runtime calls → move to
+     AGP 8.13 + KGP 2.4.20 (compileSdk 37.2) or pin a GeckoView built with
+     Kotlin ≤ 2.2.
+  2. Device-specific GeckoView failure (OS/ABI/libxul); check report ABI and
+     Android version.
+  3. Extract/loading of compressed native libs on the device — fallback to
+     `useLegacyPackaging = false`.
+
 ## Next Android-first steps
 
 1. Bottom address bar (Fenix/Waterfox-style, one-hand use).
@@ -76,7 +121,7 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
 3. Pull-to-refresh, swipe between tabs.
 4. Settings: search engine, home page, theme.
 5. PWA / add to home screen.
-6. On-device smoke test of 0.1.1 (icons, share sheet, extensions, home page).
+6. Fix the reported startup failure once the 0.1.2 diagnostics report arrives.
 
 ## Signing
 

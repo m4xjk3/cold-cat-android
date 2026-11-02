@@ -54,4 +54,12 @@
     <string name="open_external_failed">No app can open this link.</string>
     <string name="page_error">Page could not be loaded.</string>
     <string name="search_engine">DuckDuckGo</string>
+
+    <string name="menu_diagnostics">Diagnostics</string>
+    <string name="diagnostics_title">Diagnostics</string>
+    <string name="diagnostics_copy">Copy</string>
+    <string name="diagnostics_close">Close</string>
+    <string name="diagnostics_copied">Copied. Paste it into the issue report.</string>
+    <string name="startup_failed">Cold Cat could not start the browser engine</string>
+    <string name="crash_title">Cold Cat closed unexpectedly last time</string>
 </resources>

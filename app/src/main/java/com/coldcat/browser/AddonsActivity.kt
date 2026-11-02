@@ -37,6 +37,14 @@ class AddonsActivity : AppCompatActivity(), WebExtensionController.PromptDelegat
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Without a running engine the add-on manager cannot talk to GeckoView.
+        if (ColdCatApp.startupError != null) {
+            Toast.makeText(this, R.string.startup_failed, Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_addons)
 

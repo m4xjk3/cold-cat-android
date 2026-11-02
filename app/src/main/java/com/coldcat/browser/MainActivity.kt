@@ -186,9 +186,26 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        if (savedInstanceState != null) restoreTabs(savedInstanceState) else startFirstTab()
+        if (ColdCatApp.startupError == null) {
+            if (savedInstanceState != null) restoreTabs(savedInstanceState) else startFirstTab()
+        }
         updateNavigation()
         updateBadge()
+
+        ColdCatApp.startupError?.let { error ->
+            showDiagnostics(
+                getString(R.string.startup_failed),
+                CrashLog.describe(this, error, "startup"),
+            )
+        } ?: CrashLog.read(this)?.let { report ->
+            CrashLog.clear(this)
+            showDiagnostics(getString(R.string.crash_title), report)
+        } ?: CrashLog.previousUncleanExit?.let {
+            showDiagnostics(
+                getString(R.string.crash_title),
+                CrashLog.describeUncleanExit(this),
+            )
+        }
     }
 
     private fun applyInsets() {
@@ -249,7 +266,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        if (isFinishing) tabs.forEach { it.session.close() }
+        if (isFinishing) {
+            tabs.forEach { it.session.close() }
+            CrashLog.endSession(this)
+        }
         super.onDestroy()
     }
 
@@ -257,11 +277,16 @@ class MainActivity : AppCompatActivity() {
         val session = GeckoSession()
         val tab = Tab(session, url)
         tabs.add(tab)
-        session.navigationDelegate = navigationDelegate
-        session.progressDelegate = progressDelegate
-        session.contentDelegate = contentDelegate
-        session.open(ColdCatApp.runtime)
-        session.loadUri(url)
+
+        // The engine failed to start (see ColdCatApp.startupError). Keep the UI
+        // alive so the diagnostics dialog stays reachable instead of crashing.
+        if (ColdCatApp.startupError == null) {
+            session.navigationDelegate = navigationDelegate
+            session.progressDelegate = progressDelegate
+            session.contentDelegate = contentDelegate
+            session.open(ColdCatApp.runtime)
+            session.loadUri(url)
+        }
 
         if (select) {
             currentIndex = tabs.lastIndex
@@ -385,7 +410,8 @@ class MainActivity : AppCompatActivity() {
             )
             menu.add(Menu.NONE, MENU_SHARE, 3, R.string.share)
             menu.add(Menu.NONE, MENU_COPY, 4, R.string.copy_link)
-            menu.add(Menu.NONE, MENU_ABOUT, 5, R.string.about)
+            menu.add(Menu.NONE, MENU_DIAGNOSTICS, 5, R.string.menu_diagnostics)
+            menu.add(Menu.NONE, MENU_ABOUT, 6, R.string.about)
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     MENU_NEW_TAB -> addTab(UrlUtils.HOME)
@@ -400,6 +426,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     MENU_SHARE -> share(tab)
                     MENU_COPY -> copyLink(tab)
+                    MENU_DIAGNOSTICS -> showDiagnostics(
+                        getString(R.string.diagnostics_title),
+                        diagnosticsText(),
+                    )
                     MENU_ABOUT -> showAbout()
                 }
                 true
@@ -430,6 +460,37 @@ class MainActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setView(view)
             .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun diagnosticsText(): String = buildString {
+        append(CrashLog.deviceInfo(this@MainActivity))
+        appendLine("Runtime: " + if (ColdCatApp.startupError == null) "ready" else "failed")
+        appendLine("Previous run: " + if (CrashLog.previousUncleanExit == null) "clean shutdown" else "no normal shutdown")
+        appendLine("Tabs: ${tabs.size}")
+        appendLine("Start page: ${UrlUtils.HOME}")
+        ColdCatApp.startupError?.let {
+            appendLine()
+            appendLine("Startup error:")
+            append(it.stackTraceToString().lineSequence().take(12).joinToString("\n"))
+        }
+        CrashLog.read(this@MainActivity)?.lineSequence()?.take(25)?.joinToString("\n")?.let {
+            appendLine()
+            appendLine("Last crash (first lines):")
+            append(it)
+        }
+    }
+
+    private fun showDiagnostics(title: String, body: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(body)
+            .setPositiveButton(R.string.diagnostics_copy) { _, _ ->
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText(title, body))
+                Toast.makeText(this, R.string.diagnostics_copied, Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(R.string.diagnostics_close, null)
             .show()
     }
 
@@ -516,6 +577,7 @@ class MainActivity : AppCompatActivity() {
         private const val MENU_DESKTOP = 3
         private const val MENU_SHARE = 4
         private const val MENU_COPY = 5
+        private const val MENU_DIAGNOSTICS = 7
         private const val MENU_ABOUT = 6
 
         private val INTERNAL_SCHEMES = setOf(
