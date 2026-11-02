@@ -5,9 +5,26 @@
 **GitHub:** <https://github.com/m4xjk3/cold-cat-android>
 **Releases:** <https://github.com/m4xjk3/cold-cat-android/releases>
 
-## Current version: 0.1.2 (diagnostics build)
+## Current version: 0.1.3 (native crash report)
 
 Android-only product. Desktop version is a later, separate repository.
+
+### 0.1.3 — native crash report
+
+User report from 0.1.2 (Pixel 7 Pro, Android 17/API 37, arm64-v8a): no Java
+exception and no startup error, only "previous run ended without a normal
+shutdown". That means the process died natively (GeckoView) or was killed.
+
+- `ExitInfo.kt`: reads `ActivityManager.getHistoricalProcessExitReasons()` and
+  the system-provided tombstone (`ApplicationExitInfo.traceInputStream`) on
+  API 30+; shows the reason (native crash / signal / ANR / low memory) on the
+  next launch.
+- Diagnostics now lists recent exits of every Cold Cat process (main +
+  extensions) with full traces, so a child-process crash is visible too.
+- Report dialog: Copy + Share (any app) + Close; on-screen text capped at 6000
+  chars, the clipboard/share payload is complete.
+- The pre-API-30 "unclean session" guess is no longer shown on API 30+, where
+  swiping the app away produced false positives.
 
 ### 0.1.2 — diagnostics build (crash investigation)
 
@@ -45,6 +62,15 @@ adds on-device diagnostics instead of guessing:
   [Waterfox for Android](https://github.com/BrowserWorks/waterfox-android)
   (Fenix/mozilla-central fork) and why Cold Cat uses the same GeckoView engine
   with its own Android UI instead of forking Fenix.
+
+### APK 0.1.3 (signed, V2, `CN=Cold Cat`)
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `ColdCat-0.1.3-arm64-v8a.apk` | 98 958 228 | `BFBAD8FEF4AD8D247A3DA646ADCA42EFA1620252FE6824EC3B3CAF127423551E` |
+| `ColdCat-0.1.3-armeabi-v7a.apk` | 96 182 218 | `075C618249CCDD020E05B333DCA5354A6E6C3334F94778B1ACB6E18C66B1FF2E` |
+
+`versionCode = 4`, `versionName = 0.1.3`. Unit tests: 7 passed.
 
 ### APK 0.1.2 (signed, V2, `CN=Cold Cat`)
 
@@ -104,8 +130,9 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
   usable on this machine (no `emulator` package, VT-x disabled:
   `VirtualizationFirmwareEnabled = False`), so crashes cannot be reproduced
   locally.
-- 0.1.2 exists to obtain a real report from the user's phone. Awaiting:
-  diagnostics text, phone model, Android version, installed ABI.
+- 0.1.3 exists to obtain a real native trace from the user's phone. Awaiting:
+  diagnostics text / exit report, plus confirmation of the installed ABI
+  (already known: Pixel 7 Pro, Android 17, arm64-v8a).
 - Candidate causes if it is a native crash on `GeckoRuntime.create`:
   1. Kotlin 2.4 metadata read by the 2.2.10 compiler
      (`-Xskip-metadata-version-check`) producing wrong runtime calls → move to
@@ -123,7 +150,7 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
 3. Pull-to-refresh, swipe between tabs.
 4. Settings: search engine, home page, theme.
 5. PWA / add to home screen.
-6. Fix the reported startup failure once the 0.1.2 diagnostics report arrives.
+6. Fix the reported startup failure once the 0.1.3 exit report arrives.
 
 ## Signing
 

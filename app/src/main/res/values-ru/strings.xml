@@ -58,8 +58,10 @@
     <string name="menu_diagnostics">Диагностика</string>
     <string name="diagnostics_title">Диагностика</string>
     <string name="diagnostics_copy">Копировать</string>
+    <string name="diagnostics_share">Поделиться</string>
     <string name="diagnostics_close">Закрыть</string>
     <string name="diagnostics_copied">Скопировано. Вставьте текст в отчёт об ошибке.</string>
     <string name="startup_failed">Не удалось запустить движок браузера</string>
     <string name="crash_title">Cold Cat аварийно завершился в прошлый раз</string>
+    <string name="exit_report_title">Android закрыл Cold Cat</string>
 </resources>

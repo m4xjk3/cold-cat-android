@@ -199,13 +199,26 @@ class MainActivity : AppCompatActivity() {
             )
         } ?: CrashLog.read(this)?.let { report ->
             CrashLog.clear(this)
+            ExitInfo.pending(this)?.let { ExitInfo.markShown(this, it) }
             showDiagnostics(getString(R.string.crash_title), report)
-        } ?: CrashLog.previousUncleanExit?.let {
-            showDiagnostics(
-                getString(R.string.crash_title),
-                CrashLog.describeUncleanExit(this),
-            )
-        }
+        } ?: ExitInfo.pending(this)?.let { report ->
+            ExitInfo.markShown(this, report)
+            showDiagnostics(getString(R.string.exit_report_title), report.render(this))
+        } ?: uncleanExitFallback()
+    }
+
+    /**
+     * Before API 30 there is no exit history. Only there do we guess from the
+     * session marker; on newer versions swiping the app away would look like a
+     * crash even though it was a normal user action.
+     */
+    private fun uncleanExitFallback() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) return
+        CrashLog.previousUncleanExit ?: return
+        showDiagnostics(
+            getString(R.string.crash_title),
+            CrashLog.describeUncleanExit(this),
+        )
     }
 
     private fun applyInsets() {
@@ -479,19 +492,44 @@ class MainActivity : AppCompatActivity() {
             appendLine("Last crash (first lines):")
             append(it)
         }
+        ExitInfo.recent(this@MainActivity).forEach { report ->
+            appendLine()
+            appendLine("System exit: ${report.reasonText} (${report.reason}) at ${ExitInfo.format(report.timestamp)}")
+            report.processName?.let { appendLine("Process: $it") }
+            report.description?.takeIf { it.isNotBlank() }?.let { appendLine("Details: $it") }
+            report.trace?.takeIf { it.isNotBlank() }?.let {
+                appendLine("Trace:")
+                append(it)
+            }
+        }
     }
 
     private fun showDiagnostics(title: String, body: String) {
+        val shown = if (body.length > 6000) {
+            body.take(6000) + "\n…\n(The full text is copied via the Copy button.)"
+        } else {
+            body
+        }
         MaterialAlertDialogBuilder(this)
             .setTitle(title)
-            .setMessage(body)
+            .setMessage(shown)
             .setPositiveButton(R.string.diagnostics_copy) { _, _ ->
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText(title, body))
                 Toast.makeText(this, R.string.diagnostics_copied, Toast.LENGTH_SHORT).show()
             }
+            .setNeutralButton(R.string.diagnostics_share) { _, _ -> shareReport(title, body) }
             .setNegativeButton(R.string.diagnostics_close, null)
             .show()
+    }
+
+    private fun shareReport(title: String, body: String) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, title)
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+        runCatching { startActivity(Intent.createChooser(intent, title)) }
     }
 
     private fun hideKeyboard() {

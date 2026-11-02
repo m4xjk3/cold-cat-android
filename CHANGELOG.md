@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — native crash report
+
+- Added `ApplicationExitInfo` integration: the app now reads Android's own process-exit history, including the native tombstone for `REASON_CRASH_NATIVE`, and shows it on the next launch.
+- Diagnostics now include the last system exits for every Cold Cat process (main and extensions), with full traces.
+- Report dialogs can now be shared to any app, not only copied.
+- Fixed a false "unclean shutdown" report when the app was simply swiped away from recents.
+
 ## 0.1.2 — diagnostics build
 
 - Added a diagnostics screen (menu → Diagnostics) with device, Android, ABI and GeckoView versions.
