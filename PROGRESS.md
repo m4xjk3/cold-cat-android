@@ -56,6 +56,8 @@ adds on-device diagnostics instead of guessing:
 `versionCode = 3`, `versionName = 0.1.2`, package `com.coldcat.browser`,
 minSdk 26, targetSdk 37, ABIs arm64-v8a / armeabi-v7a. Unit tests: 7 passed.
 
+Published: <https://github.com/m4xjk3/cold-cat-android/releases/tag/v0.1.2>
+
 ### APK 0.1.1 (signed, V2, `CN=Cold Cat`)
 
 | File | Bytes | SHA-256 |
