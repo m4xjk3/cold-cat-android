@@ -439,9 +439,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun intentUrl(intent: Intent?): String? {
-        if (intent?.action != Intent.ACTION_VIEW) return null
-        val url = intent.dataString ?: return null
-        return if (url.startsWith("http://") || url.startsWith("https://")) url else null
+        if (intent == null) return null
+        return when (intent.action) {
+            Intent.ACTION_VIEW -> {
+                val url = intent.dataString ?: return null
+                if (url.startsWith("http://") || url.startsWith("https://")) url else null
+            }
+            // Opened from another app's "Share" sheet.
+            Intent.ACTION_SEND -> {
+                if (intent.type?.startsWith("text/") != true) return null
+                val shared = intent.getStringExtra(Intent.EXTRA_TEXT)
+                    ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)
+                    ?: return null
+                UrlUtils.firstHttpUrl(shared) ?: shared.takeIf { it.isNotBlank() }?.let(UrlUtils::toUri)
+            }
+            else -> null
+        }
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()

@@ -34,4 +34,22 @@ class UrlUtilsTest {
         assertEquals(UrlUtils.HOME, UrlUtils.toUri(UrlUtils.HOME))
         assertEquals("about:blank", UrlUtils.toUri("about:blank"))
     }
+
+    @Test
+    fun firstHttpUrlFindsSharedLink() {
+        assertEquals(
+            "https://example.com/a?b=1",
+            UrlUtils.firstHttpUrl("Смотри: https://example.com/a?b=1 — круто"),
+        )
+        assertEquals(
+            "https://example.com/x",
+            UrlUtils.firstHttpUrl("(https://example.com/x)."),
+        )
+    }
+
+    @Test
+    fun firstHttpUrlReturnsNullWithoutLink() {
+        assertEquals(null, UrlUtils.firstHttpUrl("просто текст"))
+        assertEquals(null, UrlUtils.firstHttpUrl(null))
+    }
 }

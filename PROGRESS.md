@@ -1,149 +1,85 @@
 # Cold Cat Android — progress snapshot
 
-**Updated:** 2026-11-01, after the first successful signed release build.
+**Updated:** 2026-11-02.
 **Repo root:** `C:\Users\Maks\Desktop\cold-cat\cold-cat-android`
-**GitHub account (from Git Credential Manager):** `m4xjk3`
-**Build logs:** `%TEMP%\coldcat-build6.log` (debug), `%TEMP%\coldcat-release4.log` (release)
+**GitHub:** <https://github.com/m4xjk3/cold-cat-android>
+**Releases:** <https://github.com/m4xjk3/cold-cat-android/releases>
 
-## Status: PUBLISHED ✅
+## Current version: 0.1.1 (Android-first)
 
-- Repository: <https://github.com/m4xjk3/cold-cat-android> (public, `main` pushed)
-- Release `v0.1.0`: <https://github.com/m4xjk3/cold-cat-android/releases/tag/v0.1.0>
-  - `ColdCat-0.1.0-arm64-v8a.apk` (98 865 744 bytes, SHA-256
-    `232DF74B25AF45352910C8E1FDF7FB7AE1F408750EF4F6B2A68EE0513C8417BD`)
-  - `ColdCat-0.1.0-armeabi-v7a.apk` (96 089 734 bytes, SHA-256
-    `3AE9B475599F13C32F19A7ACB2A8BAAC25D4C6D0BC5A697157881B8E15C629C2`)
-- APKs are release assets only; `dist/` is gitignored.
-- GitHub auth: token from Git Credential Manager for user `m4xjk3`
-  (scopes `repo`, `workflow`, `gist`). `gh` CLI is not installed; the API was
-  used directly.
-- GitHub Actions **green**: run
-  <https://github.com/m4xjk3/cold-cat-android/actions/runs/41269985451> — unit
-  tests + debug APK built on `ubuntu-latest` (JDK 17, SDK 37.2).
-  CI note: the runner's preinstalled `cmdline-tools` 16.0 cannot see SDK minor
-  versions; the workflow upgrades to `cmdline-tools;latest` and uses the
-  semicolon package id `platforms;android-37.2`.
+Android-only product. Desktop version is a later, separate repository.
 
-## Status: BUILD WORKS ✅
+### 0.1.1 — new transparent logo + Android share target
 
-- `.\gradlew.bat testDebugUnitTest` — pass.
-- `.\gradlew.bat assembleDebug` — pass.
-- `.\gradlew.bat assembleRelease` — pass, signed with the project release key.
-- Artifacts in `dist\`:
-  - `ColdCat-0.1.0-arm64-v8a.apk` (98.9 MB)
-  - `ColdCat-0.1.0-armeabi-v7a.apk` (96.1 MB)
-- Signature verified with `apksigner verify --print-certs`:
-  - V2 signer, DN `CN=Cold Cat, OU=Android, O=Cold Cat, L=Internet, ST=Internet, C=RU`
-  - SHA-256 `585b302803df9ca0d027cd92c573e0b72701150bd4a13427085a9e601d848ca7`
-  - SHA-1 `80124260da640b1ef08c881c0a1e7411184527f6`
-- APK badging: package `com.coldcat.browser`, versionCode 1, versionName 0.1.0,
-  minSdk 26, targetSdk 37, label `Cold Cat`.
+- Logo replaced with the new transparent-background artwork
+  (`C:\Users\Maks\Desktop\cold-cat\logo.png` → `branding/logo-source.png`).
+  Regenerated:
+  - `branding/logo.png` (README, 1024×1024, transparent);
+  - `app/src/main/assets/logo.png` (home page);
+  - `mipmap-*/ic_launcher.png` + `ic_launcher_round.png` (legacy, transparent);
+  - `mipmap-*/ic_launcher_foreground.png` (adaptive icons + splash, art in 66–72% safe zone);
+  - `branding/logo-source.jpg` and unused `branding/logo.jpg` removed.
+  `branding/make-icons.ps1` now auto-detects the artwork bounding box from the
+  alpha channel (no circular crop, no baked background) and only trims margins.
+- Android share sheet: `ACTION_SEND` (text/plain) opens the first `http(s)` link
+  from shared text, or searches the text in DuckDuckGo. Unit-tested
+  (`UrlUtils.firstHttpUrl`).
+- Docs: Android-first positioning; README explains the relation to
+  [Waterfox for Android](https://github.com/BrowserWorks/waterfox-android)
+  (Fenix/mozilla-central fork) and why Cold Cat uses the same GeckoView engine
+  with its own Android UI instead of forking Fenix.
 
-## Toolchain that actually builds
+### APK 0.1.1 (signed, V2, `CN=Cold Cat`)
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `ColdCat-0.1.1-arm64-v8a.apk` | 98 951 408 | `053580447DE7B127AB259335E6834A19B2E03588AC9D4C852D12000169528535` |
+| `ColdCat-0.1.1-armeabi-v7a.apk` | 96 175 398 | `057E9A8BE4267E347ACA761A94D6BBA5C1DA83A400FB98886B697C2CEA28AF8A` |
+
+`versionCode = 2`, `versionName = 0.1.1`, package `com.coldcat.browser`,
+minSdk 26, targetSdk 37, ABIs arm64-v8a / armeabi-v7a.
+
+## Toolchain
 
 | Component | Version |
 | --- | --- |
-| JDK | Temurin 17.0.20.101 (`C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot`) |
-| Gradle (wrapper) | 9.6.0 |
-| Android Gradle Plugin | 9.5.0 |
-| Kotlin compiler | AGP built-in (2.2.10) |
-| Android SDK platform | `platforms/android-37.2` (API 37, minor 2) |
-| Build tools | 37.0.0 |
-| GeckoView | `org.mozilla.geckoview:geckoview:159.0.20261022150525` (Mozilla Maven) |
+| JDK | Temurin 17.0.20.101 |
+| Gradle | 9.6.0 (wrapper) |
+| AGP | 9.5.0 (built-in Kotlin 2.2.10) |
+| Android SDK | platform 37.2 (`platforms;android-37.2`), build-tools 37.0.0 |
+| GeckoView | 159.0.20261022150525 (Mozilla Maven) |
 
-Local env for every build:
+Build:
 
 ```powershell
 $sdk="$env:LOCALAPPDATA\Android\Sdk"
 $env:ANDROID_HOME=$sdk; $env:ANDROID_SDK_ROOT=$sdk
 $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot"
 cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
-.\gradlew.bat assembleRelease --console=plain --no-daemon
+.\gradlew.bat testDebugUnitTest assembleRelease --console=plain --no-daemon
 ```
 
-## Build problems solved (chronological)
+## Known workarounds
 
-1. **AGP 8.13 / compileSdk 36 too old.** GeckoView 159 requires
-   `compileSdk >= 37.2` and AGP >= 9.1. Upgraded to AGP 9.5.0 + Gradle 9.6.0.
-2. **AGP 9 built-in Kotlin vs Kotlin 2.4 metadata.** GeckoView depends on
-   `kotlin-stdlib 2.4.20`; AGP 9.5's built-in compiler is Kotlin 2.2.10 and
-   rejected the metadata ("compiled with an incompatible version of Kotlin").
-   Opting out of built-in Kotlin (`android.builtInKotlin=false`) is not viable
-   because it forces `android.newDsl=false`, which in turn makes the whole
-   `android {}` DSL deprecated and fails script compilation.
-   **Solution:** keep built-in Kotlin and add
-   `-Xskip-metadata-version-check` via `kotlin.compilerOptions.freeCompilerArgs`.
-3. **`compileSdk = 37` resolved to API 37.0.** GeckoView wants 37.2 →
-   `compileSdkMinor = 2` (new AGP DSL property) and
-   `sdkmanager "platforms/android-37.2"`.
-4. **`minSdk 24` rejected** — GeckoView 159 requires API 26. Raised to 26
-   (README/CHANGELOG updated: Android 8.0+).
-5. **Kotlin nullability fixes** in `AddonsActivity.kt`: GeckoResult callbacks
-   deliver nullable `Throwable?` / `List<WebExtension>?` / `WebExtension?`;
-   `EditText.length` → `length()`.
-6. **APK was 338 MB universal.** Added ABI splits (arm64-v8a, armeabi-v7a) and
-   `useLegacyPackaging = true` to compress GeckoView's native libs:
-   arm64 APK 98.9 MB, armv7 APK 96.1 MB (fits GitHub's 100 MB file limit).
+- `-Xskip-metadata-version-check`: GeckoView 159 is built with Kotlin 2.4, AGP's
+  built-in compiler is 2.2.10. Remove when AGP bundles Kotlin 2.4+.
+- `useLegacyPackaging = true`: compressed native libs → ~95 MB download instead
+  of ~200 MB.
+- CI installs `cmdline-tools;latest` first: the runner's preinstalled
+  cmdline-tools 16.0 cannot see SDK minor versions; package id must be
+  `platforms;android-37.2` (semicolon).
 
-## Project contents (all done)
+## Next Android-first steps
 
-- GeckoView browser: tabs, URL/search bar (DuckDuckGo), home page, back/forward/
-  reload/stop, desktop-site toggle, share, copy link, about dialog.
-- Firefox extension manager: curated AMO catalog (uBlock Origin, Dark Reader,
-  Bitwarden, Privacy Badger, ClearURLs, SponsorBlock), install from `.xpi` URL,
-  installed list, uninstall, permission prompts.
-- Strict Enhanced Tracking Protection by default.
-- English + Russian UI; only these locales shipped (`androidResources.localeFilters`).
-- Branding from `C:\Users\Maks\Downloads\logo.jpg`; `branding/make-icons.ps1`
-  regenerates all mipmaps and splash assets.
-- `README.md` (Russian), `LICENSE` (MPL-2.0), `NOTICE.md`, `CHANGELOG.md`,
-  `.gitignore`, `.gitattributes`, `.editorconfig`, `keystore.properties.example`,
-  GitHub Actions workflow (`.github/workflows/android.yml`, installs SDK 37.2,
-  runs unit tests, builds debug APK).
-- Release key **outside the repo**:
-  - keystore `C:\Users\Maks\.coldcat\coldcat-release.jks`
-  - alias `coldcat`
-  - password/backup note `C:\Users\Maks\.coldcat\README.txt`
-  - `keystore.properties` in repo root is gitignored.
-  - **Back up the keystore and password.** Without them updates cannot be
-    installed over an existing Cold Cat install.
+1. Bottom address bar (Fenix/Waterfox-style, one-hand use).
+2. Private tabs, downloads, history.
+3. Pull-to-refresh, swipe between tabs.
+4. Settings: search engine, home page, theme.
+5. PWA / add to home screen.
+6. On-device smoke test of 0.1.1 (icons, share sheet, extensions, home page).
 
-## Remaining work
+## Signing
 
-1. Smoke test on a real ARM device / emulator:
-   - first launch, browsing, tabs, desktop mode;
-   - extension install from the catalog and from an `.xpi` URL;
-   - home page (`resource://android/assets/home.html` — fallback
-     `file:///android_asset/home.html` if blank).
-   No x86_64 APK is produced (ABI splits only arm64 + armv7), so the emulator
-   would need an ARM image or a temporary x86_64 build.
-4. Later: PC version in a separate repository.
-
-## How the release was published (for repeats)
-
-`gh` CLI is not installed, so the GitHub REST API was used with the token from
-Git Credential Manager:
-
-```powershell
-# token (never stored in the repo)
-$c = "protocol=https`nhost=github.com`n`n" | git credential fill
-$tok = ($c | Where-Object { $_ -like "password=*" }) -replace "^password=", ""
-
-# release + asset upload
-POST https://api.github.com/repos/m4xjk3/cold-cat-android/releases
-POST https://uploads.github.com/repos/m4xjk3/cold-cat-android/releases/<id>/assets?name=<file>
-```
-
-Pushing ordinary commits: `git push origin main` (GCM supplies credentials).
-
-## Known risks / not yet tested
-
-- No device/emulator run yet.
-- GeckoView extension install/AMO redirects and permission prompt need a real
-  smoke test.
-- `resource://android/assets/home.html` is the intended GeckoView asset URL;
-  switch to `file:///android_asset/home.html` if the home page is blank.
-- `-Xskip-metadata-version-check` is a workaround for the AGP-bundled Kotlin
-  2.2.10 compiler; revisit when AGP ships Kotlin 2.4+ (then remove the flag).
-- `useLegacyPackaging = true` compresses native libs: smaller download, slightly
-  larger install and slower first start.
+- Keystore `C:\Users\Maks\.coldcat\coldcat-release.jks`, alias `coldcat`,
+  password backup `C:\Users\Maks\.coldcat\README.txt`.
+- `keystore.properties` is local and gitignored. **Back up the keystore.**
