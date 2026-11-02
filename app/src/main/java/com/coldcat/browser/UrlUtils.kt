@@ -1,13 +1,10 @@
 package com.coldcat.browser
 
-import java.net.URLEncoder
-
-/** Turns whatever the user typed into a URL or a DuckDuckGo search. */
+/** Turns whatever the user typed into a URL or a search query. */
 object UrlUtils {
     const val HOME = "resource://android/assets/home.html"
-    private const val SEARCH = "https://duckduckgo.com/?q="
 
-    fun toUri(input: String): String {
+    fun toUri(input: String, engine: SearchEngine = SearchEngine.DEFAULT): String {
         val text = input.trim()
         if (text.isEmpty()) return HOME
 
@@ -26,7 +23,7 @@ object UrlUtils {
         }
 
         val looksLikeHost = !text.contains(' ') && text.contains('.')
-        if (!looksLikeHost) return SEARCH + URLEncoder.encode(text, "UTF-8")
+        if (!looksLikeHost) return engine.searchUrl(text)
 
         return "https://$text"
     }

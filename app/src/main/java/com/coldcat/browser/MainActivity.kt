@@ -79,7 +79,20 @@ class MainActivity : AppCompatActivity() {
             session: GeckoSession,
             request: GeckoSession.NavigationDelegate.LoadRequest,
         ): GeckoResult<AllowOrDeny>? {
-            val scheme = Uri.parse(request.uri).scheme?.lowercase() ?: return null
+            val uri = Uri.parse(request.uri)
+            val scheme = uri.scheme?.lowercase() ?: return null
+
+            // Search form on the built-in home page: use the selected engine.
+            if (scheme == "coldcat") {
+                val query = uri.getQueryParameter("q")
+                if (!query.isNullOrBlank()) {
+                    val target = ColdCatApp.searchEngine(this@MainActivity).searchUrl(query)
+                    CrashLog.checkpoint(this@MainActivity, "home:search")
+                    session.loadUri(target)
+                }
+                return GeckoResult.deny()
+            }
+
             if (scheme in INTERNAL_SCHEMES) return null
 
             try {
@@ -96,6 +109,7 @@ class MainActivity : AppCompatActivity() {
             val tab = findTab(session) ?: return
             tab.loading = true
             if (session == currentTab?.session) {
+                CrashLog.checkpoint(this@MainActivity, "page:start ${UrlUtils.pretty(url)}")
                 progressBar.visibility = View.VISIBLE
                 progressBar.progress = 0
                 reloadButton.setImageResource(R.drawable.ic_close)
@@ -107,6 +121,7 @@ class MainActivity : AppCompatActivity() {
             val tab = findTab(session) ?: return
             tab.loading = false
             if (session == currentTab?.session) {
+                CrashLog.checkpoint(this@MainActivity, "page:stop success=$success")
                 progressBar.visibility = View.INVISIBLE
                 reloadButton.setImageResource(R.drawable.ic_reload)
                 reloadButton.contentDescription = getString(R.string.reload)
@@ -138,6 +153,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        CrashLog.checkpoint(this, "activity:onCreate")
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
 
@@ -191,6 +207,7 @@ class MainActivity : AppCompatActivity() {
         }
         updateNavigation()
         updateBadge()
+        CrashLog.checkpoint(this, "activity:onCreate done")
 
         ColdCatApp.startupError?.let { error ->
             showDiagnostics(
@@ -297,7 +314,9 @@ class MainActivity : AppCompatActivity() {
             session.navigationDelegate = navigationDelegate
             session.progressDelegate = progressDelegate
             session.contentDelegate = contentDelegate
+            CrashLog.checkpoint(this, "session:open")
             session.open(ColdCatApp.runtime)
+            CrashLog.checkpoint(this, "session:load ${UrlUtils.pretty(url)}")
             session.loadUri(url)
         }
 
@@ -348,7 +367,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun load(input: String) {
         val tab = currentTab ?: return
-        tab.session.loadUri(UrlUtils.toUri(input))
+        val uri = UrlUtils.toUri(input, ColdCatApp.searchEngine(this))
+        CrashLog.checkpoint(this, "user:load ${UrlUtils.pretty(uri)}")
+        tab.session.loadUri(uri)
         urlBar.clearFocus()
         hideKeyboard()
     }
@@ -423,8 +444,12 @@ class MainActivity : AppCompatActivity() {
             )
             menu.add(Menu.NONE, MENU_SHARE, 3, R.string.share)
             menu.add(Menu.NONE, MENU_COPY, 4, R.string.copy_link)
-            menu.add(Menu.NONE, MENU_DIAGNOSTICS, 5, R.string.menu_diagnostics)
-            menu.add(Menu.NONE, MENU_ABOUT, 6, R.string.about)
+            menu.add(Menu.NONE, MENU_SEARCH_ENGINE, 5, R.string.search_engine_menu)
+            if (ColdCatApp.safeMode(this@MainActivity)) {
+                menu.add(Menu.NONE, MENU_SAFE_MODE, 6, R.string.safe_mode_disable)
+            }
+            menu.add(Menu.NONE, MENU_DIAGNOSTICS, 7, R.string.menu_diagnostics)
+            menu.add(Menu.NONE, MENU_ABOUT, 8, R.string.about)
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     MENU_NEW_TAB -> addTab(UrlUtils.HOME)
@@ -439,6 +464,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     MENU_SHARE -> share(tab)
                     MENU_COPY -> copyLink(tab)
+                    MENU_SEARCH_ENGINE -> showSearchEngineDialog()
+                    MENU_SAFE_MODE -> disableSafeMode()
                     MENU_DIAGNOSTICS -> showDiagnostics(
                         getString(R.string.diagnostics_title),
                         diagnosticsText(),
@@ -479,6 +506,8 @@ class MainActivity : AppCompatActivity() {
     private fun diagnosticsText(): String = buildString {
         append(CrashLog.deviceInfo(this@MainActivity))
         appendLine("Runtime: " + if (ColdCatApp.startupError == null) "ready" else "failed")
+        appendLine("Safe mode: " + ColdCatApp.safeMode(this@MainActivity))
+        appendLine("Search engine: " + ColdCatApp.searchEngine(this@MainActivity).title)
         appendLine("Previous run: " + if (CrashLog.previousUncleanExit == null) "clean shutdown" else "no normal shutdown")
         appendLine("Tabs: ${tabs.size}")
         appendLine("Start page: ${UrlUtils.HOME}")
@@ -494,7 +523,7 @@ class MainActivity : AppCompatActivity() {
         }
         ExitInfo.recent(this@MainActivity).forEach { report ->
             appendLine()
-            appendLine("System exit: ${report.reasonText} (${report.reason}) at ${ExitInfo.format(report.timestamp)}")
+            appendLine("System exit: ${report.reasonText} (${report.reason}) status=${report.status} at ${ExitInfo.format(report.timestamp)}")
             report.processName?.let { appendLine("Process: $it") }
             report.description?.takeIf { it.isNotBlank() }?.let { appendLine("Details: $it") }
             report.trace?.takeIf { it.isNotBlank() }?.let {
@@ -502,6 +531,9 @@ class MainActivity : AppCompatActivity() {
                 append(it)
             }
         }
+        appendLine()
+        appendLine("Checkpoints:")
+        append(CrashLog.checkpoints(this@MainActivity))
     }
 
     private fun showDiagnostics(title: String, body: String) {
@@ -532,6 +564,32 @@ class MainActivity : AppCompatActivity() {
         runCatching { startActivity(Intent.createChooser(intent, title)) }
     }
 
+    private fun showSearchEngineDialog() {
+        val engines = SearchEngine.entries
+        val current = ColdCatApp.searchEngine(this)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.search_engine_title)
+            .setSingleChoiceItems(
+                engines.map { it.title }.toTypedArray(),
+                engines.indexOf(current),
+            ) { dialog, which ->
+                ColdCatApp.setSearchEngine(this, engines[which])
+                dialog.dismiss()
+                Toast.makeText(
+                    this,
+                    getString(R.string.search_engine_set, engines[which].title),
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            .setNegativeButton(R.string.diagnostics_close, null)
+            .show()
+    }
+
+    private fun disableSafeMode() {
+        ColdCatApp.setSafeMode(this, false)
+        Toast.makeText(this, R.string.safe_mode_disabled, Toast.LENGTH_LONG).show()
+    }
+
     private fun hideKeyboard() {
         val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         manager.hideSoftInputFromWindow(urlBar.windowToken, 0)
@@ -550,7 +608,9 @@ class MainActivity : AppCompatActivity() {
                 val shared = intent.getStringExtra(Intent.EXTRA_TEXT)
                     ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)
                     ?: return null
-                UrlUtils.firstHttpUrl(shared) ?: shared.takeIf { it.isNotBlank() }?.let(UrlUtils::toUri)
+                UrlUtils.firstHttpUrl(shared)
+                    ?: shared.takeIf { it.isNotBlank() }
+                        ?.let { UrlUtils.toUri(it, ColdCatApp.searchEngine(this)) }
             }
             else -> null
         }
@@ -615,8 +675,10 @@ class MainActivity : AppCompatActivity() {
         private const val MENU_DESKTOP = 3
         private const val MENU_SHARE = 4
         private const val MENU_COPY = 5
-        private const val MENU_DIAGNOSTICS = 7
         private const val MENU_ABOUT = 6
+        private const val MENU_DIAGNOSTICS = 7
+        private const val MENU_SEARCH_ENGINE = 8
+        private const val MENU_SAFE_MODE = 9
 
         private val INTERNAL_SCHEMES = setOf(
             "http", "https", "about", "resource", "file", "data", "blob", "moz-extension",

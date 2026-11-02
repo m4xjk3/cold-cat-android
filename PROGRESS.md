@@ -5,9 +5,27 @@
 **GitHub:** <https://github.com/m4xjk3/cold-cat-android>
 **Releases:** <https://github.com/m4xjk3/cold-cat-android/releases>
 
-## Current version: 0.1.3 (native crash report)
+## Current version: 0.1.4 (safe mode + search picker)
 
 Android-only product. Desktop version is a later, separate repository.
+
+### 0.1.4 — safe mode, search engine picker, startup checkpoints
+
+0.1.3's exit report said `REASON_SIGNALED` with no tombstone: the process was
+killed by the system / a child-process failure, not a catchable Java error.
+
+- **Safe mode** (`ColdCatApp.decideSafeMode`): a new crash timestamp (from
+  `ApplicationExitInfo`, main process) turns on a conservative engine setup:
+  `extensionsProcessEnabled(false)`, `appZygoteProcessEnabled(false)`,
+  `isolatedProcessEnabled(false)`, ETP `DEFAULT`. Menu item disables it again.
+- **Search engine picker** (`SearchEngine`): Яндекс (default for `ru` locale),
+  DuckDuckGo, Google, Bing; persisted in `coldcat_prefs`. Home page search form
+  posts to `coldcat://search`, handled in `onLoadRequest` with the chosen engine.
+- **Startup checkpoints** (`CrashLog.checkpoint`): `app:onCreate`,
+  `engine:create …`, `activity:onCreate`, `session:open`, `session:load`,
+  `page:start/stop`, `home:search` — written to `files/checkpoints.txt`.
+  Shown in the exit report and diagnostics.
+- `ExitInfo.Report.status` is now reported (signal number for signal kills).
 
 ### 0.1.3 — native crash report
 
@@ -62,6 +80,15 @@ adds on-device diagnostics instead of guessing:
   [Waterfox for Android](https://github.com/BrowserWorks/waterfox-android)
   (Fenix/mozilla-central fork) and why Cold Cat uses the same GeckoView engine
   with its own Android UI instead of forking Fenix.
+
+### APK 0.1.4 (signed, V2, `CN=Cold Cat`)
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `ColdCat-0.1.4-arm64-v8a.apk` | 98 963 932 | `0F788217A0BE3059DA109A8274C70C597BDBAF589D2C955AB10FFB91F74D9248` |
+| `ColdCat-0.1.4-armeabi-v7a.apk` | 96 187 922 | `F2FAE4230B684A70B5C6C46A4A753FB24F60236BD1D2E579CE563503CF9B2832` |
+
+`versionCode = 5`, `versionName = 0.1.4`. Unit tests: 7 passed.
 
 ### APK 0.1.3 (signed, V2, `CN=Cold Cat`)
 
@@ -128,22 +155,16 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
 
 ## Blockers / crash investigation
 
-- No Android device is attached (`adb devices` empty) and the emulator is not
-  usable on this machine (no `emulator` package, VT-x disabled:
-  `VirtualizationFirmwareEnabled = False`), so crashes cannot be reproduced
-  locally.
-- 0.1.3 exists to obtain a real native trace from the user's phone. Awaiting:
-  diagnostics text / exit report, plus confirmation of the installed ABI
-  (already known: Pixel 7 Pro, Android 17, arm64-v8a).
-- Candidate causes if it is a native crash on `GeckoRuntime.create`:
-  1. Kotlin 2.4 metadata read by the 2.2.10 compiler
-     (`-Xskip-metadata-version-check`) producing wrong runtime calls → move to
-     AGP 8.13 + KGP 2.4.20 (compileSdk 37.2) or pin a GeckoView built with
-     Kotlin ≤ 2.2.
-  2. Device-specific GeckoView failure (OS/ABI/libxul); check report ABI and
-     Android version.
-  3. Extract/loading of compressed native libs on the device — fallback to
-     `useLegacyPackaging = false`.
+- 0.1.3 report: `REASON_SIGNALED`, status unknown at the time, no tombstone,
+  main process `com.coldcat.browser`, Pixel 7 Pro / Android 17 / arm64.
+  Interpretation: system kill or a GeckoView child-process failure, not a Java
+  exception. 0.1.4 answers it with safe mode + checkpoints.
+- Still no local device: `adb devices` empty; emulator unusable (no package,
+  VT-x off). USB debugging + `adb logcat -b crash` would give the exact signal
+  and stack immediately if the user can connect the phone.
+- If safe mode fixes startup, the cause is a GeckoView helper process; then
+  re-enable features one by one (extensions process → app-zygote).
+- If it still dies, `checkpoints.txt` shows the last step reached.
 
 ## Next Android-first steps
 
@@ -152,7 +173,7 @@ cd C:\Users\Maks\Desktop\cold-cat\cold-cat-android
 3. Pull-to-refresh, swipe between tabs.
 4. Settings: search engine, home page, theme.
 5. PWA / add to home screen.
-6. Fix the reported startup failure once the 0.1.3 exit report arrives.
+6. Fix the reported startup failure once a 0.1.4 report (checkpoints / safe mode) arrives.
 
 ## Signing
 

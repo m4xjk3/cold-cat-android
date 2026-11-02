@@ -16,6 +16,8 @@ import java.util.Locale
  */
 object CrashLog {
     private const val FILE_NAME = "last-crash.txt"
+    private const val CHECKPOINT_FILE = "checkpoints.txt"
+    private const val MAX_CHECKPOINTS = 40
     private const val PREFS = "coldcat_diag"
     private const val KEY_ACTIVE = "session_active"
     private const val KEY_STARTED = "session_started"
@@ -62,6 +64,30 @@ object CrashLog {
     fun read(context: Context): String? = runCatching {
         File(context.filesDir, FILE_NAME).takeIf { it.exists() }?.readText()
     }.getOrNull()?.takeIf { it.isNotBlank() }
+
+    /**
+     * Breadcrumbs written to disk before risky steps. If the process is killed
+     * without a Java exception and Android gives us no tombstone, these lines
+     * still show how far startup got.
+     */
+    fun checkpoint(context: Context, message: String) {
+        runCatching {
+            synchronized(lock) {
+                val file = File(context.filesDir, CHECKPOINT_FILE)
+                val line = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date()) +
+                    "  " + message + "\n"
+                val kept = file.takeIf { it.exists() }
+                    ?.readLines()
+                    ?.takeLast(MAX_CHECKPOINTS - 1)
+                    .orEmpty()
+                file.writeText(kept.joinToString("", postfix = if (kept.isEmpty()) "" else "\n") + line)
+            }
+        }
+    }
+
+    fun checkpoints(context: Context): String = runCatching {
+        File(context.filesDir, CHECKPOINT_FILE).takeIf { it.exists() }?.readText()
+    }.getOrNull()?.takeIf { it.isNotBlank() } ?: "(none)"
 
     fun clear(context: Context) {
         runCatching { File(context.filesDir, FILE_NAME).delete() }

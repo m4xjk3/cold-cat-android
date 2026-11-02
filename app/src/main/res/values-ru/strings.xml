@@ -54,6 +54,11 @@
     <string name="open_external_failed">Нет приложения, которое может открыть эту ссылку.</string>
     <string name="page_error">Не удалось загрузить страницу.</string>
     <string name="search_engine">DuckDuckGo</string>
+    <string name="search_engine_menu">Поисковик</string>
+    <string name="search_engine_title">Поисковая система</string>
+    <string name="search_engine_set">Поиск: %1$s</string>
+    <string name="safe_mode_disable">Выключить безопасный режим</string>
+    <string name="safe_mode_disabled">Безопасный режим выключен. Перезапустите Cold Cat.</string>
 
     <string name="menu_diagnostics">Диагностика</string>
     <string name="diagnostics_title">Диагностика</string>

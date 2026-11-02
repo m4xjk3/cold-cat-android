@@ -23,6 +23,7 @@ object ExitInfo {
         val timestamp: Long,
         val description: String?,
         val processName: String?,
+        val status: Int,
         val trace: String?,
     ) {
         val reasonText: String get() = reasonName(reason)
@@ -43,12 +44,19 @@ object ExitInfo {
         fun render(context: Context): String = buildString {
             appendLine("Cold Cat exit report")
             appendLine("Reason: $reasonText (${reason})")
+            appendLine("Status: $status" + if (reason == ApplicationExitInfo.REASON_SIGNALED) {
+                " (signal $status)"
+            } else {
+                ""
+            })
             appendLine("When: ${format(timestamp)}")
             if (!description.isNullOrBlank()) appendLine("Details: $description")
             if (!processName.isNullOrBlank()) appendLine("Process: $processName")
+            appendLine("Safe mode: ${ColdCatApp.safeMode(context)}")
             appendLine()
             append(CrashLog.deviceInfo(context))
-            appendLine()
+            appendLine("Checkpoints:")
+            appendLine(CrashLog.checkpoints(context))
             appendLine("Trace:")
             append(trace?.takeIf { it.isNotBlank() } ?: "(the system did not provide a trace)")
         }
@@ -94,6 +102,7 @@ object ExitInfo {
             timestamp = timestamp,
             description = description,
             processName = processName,
+            status = status,
             trace = trace,
         )
     }

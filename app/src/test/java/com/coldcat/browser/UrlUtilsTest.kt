@@ -19,8 +19,18 @@ class UrlUtilsTest {
 
     @Test
     fun plainTextBecomesSearch() {
-        assertTrue(UrlUtils.toUri("cold cat browser").startsWith("https://duckduckgo.com/?q="))
-        assertTrue(UrlUtils.toUri("hello").startsWith("https://duckduckgo.com/?q="))
+        assertTrue(
+            UrlUtils.toUri("cold cat browser", SearchEngine.DUCKDUCKGO)
+                .startsWith("https://duckduckgo.com/?q="),
+        )
+        assertTrue(
+            UrlUtils.toUri("hello", SearchEngine.YANDEX)
+                .startsWith("https://yandex.ru/search/?text="),
+        )
+        assertTrue(
+            UrlUtils.toUri("hello", SearchEngine.GOOGLE)
+                .startsWith("https://www.google.com/search?q="),
+        )
     }
 
     @Test

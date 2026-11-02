@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4 — safe mode, search engine picker, checkpoints
+
+- **Safe mode**: if the previous run was killed or crashed, Cold Cat starts with a conservative engine setup (no app-zygote, no isolated content process, no separate extension process, standard tracking protection). Leave it via menu → «Disable safe mode».
+- **Search engine picker** (menu → «Search engine»): Яндекс, DuckDuckGo, Google, Bing. Default is Яндекс for Russian system locale, DuckDuckGo otherwise. The home page search form now uses the selected engine (`coldcat://search`).
+- **Checkpoints**: startup steps are written to `checkpoints.txt` before they run, so even a silent kill shows exactly how far the engine got. Included in the exit report and diagnostics.
+- Exit reports now include the raw `status` (signal number for signal kills).
+
 ## 0.1.3 — native crash report
 
 - Added `ApplicationExitInfo` integration: the app now reads Android's own process-exit history, including the native tombstone for `REASON_CRASH_NATIVE`, and shows it on the next launch.
