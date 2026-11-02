@@ -90,6 +90,8 @@ adds on-device diagnostics instead of guessing:
 
 `versionCode = 5`, `versionName = 0.1.4`. Unit tests: 7 passed.
 
+Published: <https://github.com/m4xjk3/cold-cat-android/releases/tag/v0.1.4>
+
 ### APK 0.1.3 (signed, V2, `CN=Cold Cat`)
 
 | File | Bytes | SHA-256 |
